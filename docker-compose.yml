@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    container_name: ngs_lims_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lims_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-ngs_lims}
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "127.0.0.1:${PGPORT:-5433}:5432"
+    volumes:
+      - ./sql:/sql:ro
+      - ./tests:/tests:ro
+      - ./report:/report:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pgdata:
